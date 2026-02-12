@@ -1,0 +1,64 @@
+services:
+
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "${FORWARD_API_PORT:-8001}:80"
+    restart: always
+    volumes:
+      - .:/var/www/html
+    extra_hosts:
+      - host.docker.internal:${IP_DOCKER:-host-gateway}
+    networks:
+      - my-network
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    ports:
+      - "${FORWARD_DATABASE_PORT:-3306}:3306"
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-score-matchs}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_USER: ${DB_USERNAME:-user}
+      TZ: Brazil/East
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - my-network
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "${FORWARD_REDIS_PORT:-6379}:6379"
+    restart: always
+    networks:
+      - my-network
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "${FORWARD_MAILHOG_SMTP_PORT:-1025}:1025"  # SMTP
+      - "${FORWARD_MAILHOG_WEB_PORT:-8025}:8025"  # Web UI
+    restart: always
+    volumes:
+      - mailhog-data:/data
+    networks:
+      - my-network
+
+volumes:
+  mysql_data:
+    driver: local
+  mailhog-data:
+    driver: local
+
+networks:
+  my-network:
+    driver: bridge
