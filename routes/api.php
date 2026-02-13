@@ -20,4 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Teams resource routes
     Route::apiResource('teams', App\Http\Controllers\TeamController::class);
+
+    //Players resource routes
+    Route::apiResource('players', App\Http\Controllers\PlayerController::class);
 });

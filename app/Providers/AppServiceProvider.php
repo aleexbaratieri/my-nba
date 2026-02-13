@@ -22,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
             Contracts\TeamRepositoryInterface::class,
             Eloquent\TeamRepository::class
         );
+
+        $this->app->bind(
+            Contracts\PlayerRepositoryInterface::class,
+            Eloquent\PlayerRepository::class
+        );
     }
 
     /**
