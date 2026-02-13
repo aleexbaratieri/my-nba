@@ -17,4 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //User resource routes
     Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
     Route::get('users/{id}', [App\Http\Controllers\UserController::class, 'show']);
+
+    //Teams resource routes
+    Route::apiResource('teams', App\Http\Controllers\TeamController::class);
 });

@@ -17,6 +17,11 @@ class AppServiceProvider extends ServiceProvider
             Contracts\UserRepositoryInterface::class,
             Eloquent\UserRepository::class
         );
+
+        $this->app->bind(
+            Contracts\TeamRepositoryInterface::class,
+            Eloquent\TeamRepository::class
+        );
     }
 
     /**
