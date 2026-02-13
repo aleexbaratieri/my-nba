@@ -19,10 +19,20 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         return $this->model->create($data->toArray());
     }
 
+    public function createOrUpdate(UserData $data): User
+    {
+        return $this->model->updateOrCreate(['email' => $data->email], $data->toArray());
+    }
+
     public function updateById(Uuid $id, UserData $data): User
     {
         $user = $this->findById($id);
         $user->update($data->toArray());
         return $user;
+    }
+
+    public function findByEmail(string $email): User
+    {
+        return $this->model->whereEmail($email)->firstOrFail();
     }
 }

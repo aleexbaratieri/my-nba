@@ -9,5 +9,7 @@ use Ramsey\Uuid\UuidInterface as Uuid;
 interface UserRepositoryInterface extends BaseRepositoryInterface
 {
     public function create(UserData $data): User;
+    public function createOrUpdate(UserData $data): User;
     public function updateById(Uuid $id, UserData $data): User;
+    public function findByEmail(string $email): User;
 }

@@ -7,6 +7,7 @@ use App\Http\Requests\GameRequest;
 use App\Http\Resources\GameResource;
 use App\Repositories\Contracts\GameRepositoryInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Ramsey\Uuid\Uuid;
 
 class GameController extends Controller

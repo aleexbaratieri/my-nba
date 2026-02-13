@@ -18,22 +18,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $userRepo = app()->make(UserRepository::class);
-
-        $userRepo->create(
-            new UserData(
-                name: 'Administrador', 
-                email: 'admin@admin.com', 
-                password: 'secret'
-            )
-        );
-
-        $userRepo->create(
-            new UserData(
-                name: 'Usuário', 
-                email: 'user@user.com', 
-                password: 'secret'
-            )
-        );
+        $this->call([
+            UserSeeder::class,
+            PermissionSeeder::class
+        ]);
     }
 }
