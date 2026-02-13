@@ -23,4 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Players resource routes
     Route::apiResource('players', App\Http\Controllers\PlayerController::class);
+
+    //Games resource routes
+    Route::apiResource('games', App\Http\Controllers\GameController::class);
 });

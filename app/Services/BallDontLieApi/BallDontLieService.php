@@ -2,6 +2,8 @@
 
 namespace App\Services\BallDontLieApi;
 
+use GuzzleHttp\Promise\PromiseInterface;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class BallDontLieService
@@ -31,19 +33,7 @@ class BallDontLieService
             ];
 
             $response = Http::withHeaders($this->headers)->get($this->baseUrl . '/players' . '?' . http_build_query($httpFilters));
-
-            if ($response->ok()) {
-                return $response->json();
-            }
-
-            if ($response->status() === 429) {
-                return [
-                    'error' => [
-                        'message' => 'Rate limit exceeded',
-                        'code' => $response->status()
-                    ]
-                ];
-            }
+            return $this->handleResponse($response);
 
         } catch (\Throwable $th) {
             throw $th;
@@ -55,26 +45,51 @@ class BallDontLieService
         try {
 
             $response = Http::withHeaders($this->headers)->get($this->baseUrl . '/teams');
-            return $response->json();
+            return $this->handleResponse($response);
             
         } catch (\Throwable $th) {
             throw $th;
         }
     }
 
-    public function getGames(int $season)
+    public function getGames(array $seasons, int $cursor = 0, int $perPage = 25)
     {
         $httpFilters = [
-            'seasons' => $season
+            'seasons' => $seasons,
+            'cursor' => $cursor,
+            'per_page' => $perPage
         ];
 
         try {
 
             $response = Http::withHeaders($this->headers)->get($this->baseUrl . '/games' . '?' . http_build_query($httpFilters));
-            return $response->json();
+            return $this->handleResponse($response);
             
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+
+    protected function handleResponse(Response|PromiseInterface $response): array
+    {
+        if ($response->ok()) {
+            return $response->json();
+        }
+
+        if ($response->status() === 429) {
+            return [
+                'error' => [
+                    'message' => 'Rate limit exceeded',
+                    'code' => $response->status()
+                ]
+            ];
+        }
+
+        return [
+            'error' => [
+                'message' => 'Something went wrong',
+                'code' => $response->status()
+            ]
+        ];
     }
 }

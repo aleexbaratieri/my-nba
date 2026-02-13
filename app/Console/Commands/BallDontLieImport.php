@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ImportGamesToDatabaseJob;
 use App\Jobs\ImportPlayersToDatabaseJob;
 use App\Jobs\ImportTeamsToDatabaseJob;
 use App\Services\BallDontLieApi;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class BallDontLieImport extends Command
@@ -109,5 +111,52 @@ class BallDontLieImport extends Command
         } while ($cursor !== null);
 
         $this->info('Importação de jogadores finalizada.');
+    }
+
+    protected function importGames(BallDontLieApi\BallDontLieService $service): void
+    {
+        $this->info('Importando jogos...');
+
+        $maxYear = Carbon::today()->subYear()->year;
+
+        $this->season = $this->option('season') ?? $maxYear;
+
+        if (!is_numeric($this->season)) {
+            $this->season = $maxYear;
+        }
+
+        if ($this->season > $maxYear) {
+            $this->season = $maxYear;
+        }
+
+        $cursor = 0;
+        $perPage = 100;
+
+        do {
+            $games = $this->retryRequest(
+                fn () => $service->getGames(
+                    seasons: [$this->season],
+                    perPage: $perPage,
+                    cursor: $cursor
+                )
+            );
+
+            if (!isset($games['data'])) {
+                $this->error('Resposta inválida da API.');
+                return;
+            }
+
+            ImportGamesToDatabaseJob::dispatch($games);
+
+            logger('Página de games importada', [
+                'cursor' => $cursor,
+                'count'  => count($games['data']),
+            ]);
+
+            $cursor = $games['meta']['next_cursor'] ?? null;
+
+        } while ($cursor !== null);
+
+        $this->info('Job de importação de jogos despachado.');
     }
 }
