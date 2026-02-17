@@ -1,59 +1,101 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## :rocket: Instalação
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+- Pré-requisitos:
+    :whale: [Docker](https://docs.docker.com/engine/install/)
+    :whale: [Docker Compose](https://docs.docker.com/compose/install/)
+    :sparkles: [Git](https://git-scm.com/install/)
+  
+```bash
+git clone git@github.com:aleexbaratieri/my-nba.git
 
-## About Laravel
+cd my-nba
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+cp .env.example .env
+```
+## :cd: Configuração
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+:floppy_disk: Edite as variáveis de ambiente.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```bash
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=your_database
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
 
-## Learning Laravel
+SESSION_DRIVER=redis
+CACHE_STORE=redis
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+REDIS_CLIENT=predis
+REDIS_HOST=redis
+REDIS_PASSWORD=null
+REDIS_PORT=6379
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+MAIL_MAILER=smtp
+MAIL_SCHEME=null
+MAIL_HOST=mailhog
+MAIL_PORT=1026
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
 
-## Laravel Sponsors
+FORWARD_API_PORT=8080
+FORWARD_DATABASE_PORT=3306
+FORWARD_REDIS_PORT=6379
+IP_DOCKER=172.17.0.1
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+FORWARD_MAILHOG_SMTP_PORT=1025
+FORWARD_MAILHOG_WEB_PORT=8025
 
-### Premium Partners
+BALLDONTLIE_BASE_URL=https://api.balldontlie.io/v1
+BALLDONTLIE_API_KEY=your_api_key
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+#### Iniciar Containers
 
-## Contributing
+```bash
+docker compose up -d
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+docker compose exec api composer install
+docker compose exec api artisan key:generate
+docker compose exec api artisan migrate --seed
+```
 
-## Code of Conduct
+### :computer: [Documentação da Api](http://localhost:8080/docs/api#/)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### :basketball: Importar dados da api do BallDontLie
 
-## Security Vulnerabilities
+Processo pode demorar um pouco pois a api limita a 5 reqs por minuto na versão gratis.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+##### :star: Importar Times
 
-## License
+```bash
+docker compose exec api php artisan balldontlie:import --teams
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+##### :bookmark: Importar Jogos
+
+Parametro `--season` default é temporada passada
+
+```bash
+docker compose exec api php artisan balldontlie:import --games --season=2025
+```
+
+##### :boy: Importar Jogadores
+
+Esse é o processo mais demorado devido a quantidade de items que precisam ser importados.
+
+```bash
+docker compose exec api php artisan balldontlie:import --players
+```
+
+Obs: Pode ser feito todos de uma vez, porém a uma chance dos relacionamentos ainda não existirem e alguns itens não serem importados. Caso vc faça a importação mais de uma vez, os itens serão atualizados.
+
+Comando para rodar tudos os processos juntos:
+
+```bash
+docker compose exec api php artisan balldontlie:import --season=2025 --teams --games --players
+```
