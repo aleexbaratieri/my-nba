@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append([
             App\Http\Middleware\ForceResponseJson::class,
+            App\Http\Middleware\XAuthMiddleware::class,
         ]);
         $middleware->alias([
             'permission' => App\Http\Middleware\CheckPermission::class,
