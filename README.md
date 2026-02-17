@@ -1,9 +1,9 @@
 ## :rocket: Instalação
 
 - Pré-requisitos:
-    :whale: [Docker](https://docs.docker.com/engine/install/)
-    :whale: [Docker Compose](https://docs.docker.com/compose/install/)
-    :sparkles: [Git](https://git-scm.com/install/)
+    - :whale: [Docker](https://docs.docker.com/engine/install/)
+    - :whale: [Docker Compose](https://docs.docker.com/compose/install/)
+    - :sparkles: [Git](https://git-scm.com/install/)
   
 ```bash
 git clone git@github.com:aleexbaratieri/my-nba.git
